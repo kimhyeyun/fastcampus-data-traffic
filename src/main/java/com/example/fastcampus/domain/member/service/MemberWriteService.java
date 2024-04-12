@@ -2,6 +2,7 @@ package com.example.fastcampus.domain.member.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.fastcampus.domain.member.dto.MemberDto;
 import com.example.fastcampus.domain.member.dto.RegisterMemberCommand;
 import com.example.fastcampus.domain.member.entity.Member;
 import com.example.fastcampus.domain.member.repository.MemberRepository;
@@ -20,13 +21,14 @@ public class MemberWriteService {
 	 *
 	 * @parameter	memberRegisterCommand
 	 * */
-	public Member create(RegisterMemberCommand command) {
+	public MemberDto register(RegisterMemberCommand command) {
 		var member = Member.builder()
 			.email(command.email())
 			.nickname(command.nickname())
 			.birth(command.birth())
 			.build();
 
-		return memberRepository.save(member);
+		member = memberRepository.save(member);
+		return MemberDto.toDto(member);
 	}
 }

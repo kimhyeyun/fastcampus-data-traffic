@@ -1,11 +1,14 @@
 package com.example.fastcampus.domain.member.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.fastcampus.domain.member.dto.MemberDto;
 import com.example.fastcampus.domain.member.dto.RegisterMemberCommand;
-import com.example.fastcampus.domain.member.entity.Member;
+import com.example.fastcampus.domain.member.service.MemberReadService;
 import com.example.fastcampus.domain.member.service.MemberWriteService;
 
 import lombok.RequiredArgsConstructor;
@@ -15,10 +18,16 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
 	private final MemberWriteService memberWriteService;
+	private final MemberReadService memberReadService;
 
 	@PostMapping("/members")
-	public Member register(@RequestBody RegisterMemberCommand command) {
-		return memberWriteService.create(command);
+	public MemberDto register(@RequestBody RegisterMemberCommand command) {
+		return memberWriteService.register(command);
+	}
+
+	@GetMapping("/members/{id}")
+	public MemberDto getMember(@PathVariable Long id) {
+		return memberReadService.getMember(id);
 	}
 
 }
