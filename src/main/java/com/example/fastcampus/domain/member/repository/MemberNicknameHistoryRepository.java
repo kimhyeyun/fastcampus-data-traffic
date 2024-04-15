@@ -3,7 +3,7 @@ package com.example.fastcampus.domain.member.repository;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -14,73 +14,58 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import com.example.fastcampus.domain.member.entity.Member;
+import com.example.fastcampus.domain.member.entity.MemberNicknameHistory;
 
 import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class MemberRepository {
+public class MemberNicknameHistoryRepository {
+
 
 	private static final String CATALOG_NAME = "fast_sns";
-	private static final String TABLE_NAME = "Member";
+	private static final String TABLE_NAME = "MemberNicknameHistory";
 
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 
-	private static final RowMapper<Member> rowMapper = (ResultSet resultSet, int rowNum) -> Member
+	private static final RowMapper<MemberNicknameHistory> rowMapper = (ResultSet resultSet, int rowNum) -> MemberNicknameHistory
 		.builder()
 		.id(resultSet.getLong("id"))
-		.email(resultSet.getString("email"))
+		.memberId(resultSet.getLong("memberId"))
 		.nickname(resultSet.getString("nickname"))
-		.birth(resultSet.getObject("birth", LocalDate.class))
 		.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
 		.build();
 
-	public Optional<Member> findById(Long id) {
-		/*
-		 * select *
-		 * from Member
-		 * where id := id
-		 * */
+	public List<MemberNicknameHistory> findAllByMemberId(Long memberId) {
+		var sql = String.format("SELECT * FROM %s WHERE memberId = :memberId", TABLE_NAME);
+		var param = new MapSqlParameterSource().addValue("memberId", memberId);
 
-		var sql = String.format("SELECT * FROM %s WHERE id = :id", TABLE_NAME);
-		var params = new MapSqlParameterSource()
-			.addValue("id", id);
-
-		var member = jdbcTemplate.queryForObject(sql, params, rowMapper);
-
-		return Optional.ofNullable(member);
+		return jdbcTemplate.query(sql, param, rowMapper);
 	}
 
-	public Member save(Member member) {
-		if (member.getId() == null) {
-			return insert(member);
+	public MemberNicknameHistory save(MemberNicknameHistory memberNicknameHistory) {
+		if (memberNicknameHistory.getId() == null) {
+			return insert(memberNicknameHistory);
 		}
-		return update(member);
+		throw new UnsupportedOperationException("MemberNicknameHistory는 갱신 지원하지 않습니다.");
 	}
 
-	private Member update(Member member) {
-		var sql = String.format("UPDATE %s SET nickname = :nickname WHERE id = :id", TABLE_NAME);
-		SqlParameterSource params = new BeanPropertySqlParameterSource(member);
-		jdbcTemplate.update(sql, params);
-
-		return member;
-	}
-
-	private Member insert(Member member) {
+	private MemberNicknameHistory insert(MemberNicknameHistory memberNicknameHistory) {
 		SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
 			.withCatalogName(CATALOG_NAME)
 			.withTableName(TABLE_NAME)
 			.usingGeneratedKeyColumns("id");
 
-		SqlParameterSource params = new BeanPropertySqlParameterSource(member);
+		SqlParameterSource params = new BeanPropertySqlParameterSource(memberNicknameHistory);
 		var id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-		return Member.builder()
+		return MemberNicknameHistory.builder()
 			.id(id)
-			.email(member.getEmail())
-			.nickname(member.getNickname())
-			.birth(member.getBirth())
+			.memberId(memberNicknameHistory.getMemberId())
+			.nickname(memberNicknameHistory.getNickname())
+			.createdAt(memberNicknameHistory.getCreatedAt())
 			.build();
 	}
+
 }
