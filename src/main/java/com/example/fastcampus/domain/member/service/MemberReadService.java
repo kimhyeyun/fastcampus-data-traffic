@@ -30,4 +30,8 @@ public class MemberReadService {
 			.stream().map(MemberNicknameHistoryDto::toDto).toList();
 	}
 
+	public List<MemberDto> getMembers(List<Long> ids) {
+		var members = memberRepository.findAllByIdIn(ids);
+		return members.stream().map(MemberDto::toDto).toList();
+	}
 }

@@ -3,6 +3,7 @@ package com.example.fastcampus.domain.member.repository;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import org.webjars.NotFoundException;
 
 import com.example.fastcampus.domain.member.entity.Member;
 
@@ -57,6 +59,16 @@ public class MemberRepository {
 			return insert(member);
 		}
 		return update(member);
+	}
+
+	public List<Member> findAllByIdIn(List<Long> ids) {
+		if (ids.isEmpty())
+			throw new NotFoundException("팔로우하고 있는 회원이 없습니다.");
+
+		var sql = String.format("SELECT * FROM %s WHERE id in (:ids)", TABLE_NAME);
+		var params = new MapSqlParameterSource().addValue("ids", ids);
+
+		return jdbcTemplate.query(sql, params, rowMapper);
 	}
 
 	private Member update(Member member) {

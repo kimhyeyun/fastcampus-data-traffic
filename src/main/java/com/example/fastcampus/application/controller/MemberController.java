@@ -1,4 +1,4 @@
-package com.example.fastcampus.domain.member.controller;
+package com.example.fastcampus.application.controller;
 
 import java.util.List;
 
